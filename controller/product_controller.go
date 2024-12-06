@@ -109,7 +109,6 @@ func UpdateProduct(c echo.Context) error {
 	product.NamaProduct = req.NamaProduct
 	product.Harga = req.Harga
 	product.Quantity = req.Quantity
-	product.IdBrand = req.IdBrand
 
 	tx := config.DB.Begin()
 	if err := tx.Save(&product).Error; err != nil {
@@ -125,7 +124,6 @@ func UpdateProduct(c echo.Context) error {
 		NamaProduct: product.NamaProduct,
 		Harga:       product.Harga,
 		Quantity:    product.Quantity,
-		IdBrand:     product.IdBrand,
 	}
 
 	return c.JSON(http.StatusOK, response.TemplateResponse{
