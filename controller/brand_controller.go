@@ -15,7 +15,10 @@ func CreateBrand(c echo.Context) error {
 	var req request.CreateBrandRequest
 
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid request",
+			Data:    nil,
+		})
 	}
 
 	brand := entities.Brands{
@@ -23,35 +26,56 @@ func CreateBrand(c echo.Context) error {
 	}
 
 	if err := config.DB.Create(&brand).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create brand"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to create brand",
+			Data:    nil,
+		})
 	}
 
 	resp := response.CreateBrandResponse{
 		ID: brand.IdBrand,
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "success insert new brand",
+		Data:    resp,
+	})
 }
 
 func DeleteBrand(c echo.Context) error {
 	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid brand ID"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid brand ID",
+			Data:    nil,
+		})
 	}
 
 	var count int64
 	if err := config.DB.Model(&entities.Products{}).Where("id_brand = ?", idInt).Count(&count).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to check brand usage"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to check brand usage",
+			Data:    nil,
+		})
 	}
 
 	if count > 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Cannot delete brand, it is in use by products"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "can't delete brand, it is in use by products",
+			Data:    nil,
+		})
 	}
 
 	if err := config.DB.Delete(&entities.Brands{}, idInt).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete brand"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to delete brand",
+			Data:    nil,
+		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Brand deleted successfully"})
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "brand deleted successfully",
+		Data:    nil,
+	})
 }

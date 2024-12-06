@@ -15,7 +15,10 @@ func CreateProduct(c echo.Context) error {
 	var req request.CreateProductRequest
 
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid request payload",
+			Data:    nil,
+		})
 	}
 
 	product := entities.Products{
@@ -26,10 +29,18 @@ func CreateProduct(c echo.Context) error {
 	}
 
 	if err := config.DB.Create(&product).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create product"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to insert product",
+			Data:    nil,
+		})
 	}
 
-	return c.JSON(http.StatusCreated, response.CreateProductResponse{ID: product.ID})
+	resp := response.CreateProductResponse{ID: product.ID}
+
+	return c.JSON(http.StatusCreated, response.TemplateResponse{
+		Message: "success insert new product",
+		Data:    resp,
+	})
 }
 
 func GetProductById(c echo.Context) error {
@@ -37,12 +48,18 @@ func GetProductById(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid product ID"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid product id",
+			Data:    nil,
+		})
 	}
 
 	var product entities.Products
 	if err := config.DB.First(&product, productID).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Product not found"})
+		return c.JSON(http.StatusNotFound, response.TemplateResponse{
+			Message: "product not found",
+			Data:    nil,
+		})
 	}
 
 	resp := response.GetProductByIdResponse{
@@ -53,7 +70,10 @@ func GetProductById(c echo.Context) error {
 		IdBrand:     product.IdBrand,
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "success get product detail",
+		Data:    resp,
+	})
 }
 
 func UpdateProduct(c echo.Context) error {
@@ -61,17 +81,26 @@ func UpdateProduct(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid product ID"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid product id",
+			Data:    nil,
+		})
 	}
 
 	var req request.UpdateProductRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid request payload",
+			Data:    nil,
+		})
 	}
 
 	var product entities.Products
 	if err := config.DB.First(&product, productID).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Product not found"})
+		return c.JSON(http.StatusNotFound, response.TemplateResponse{
+			Message: "product not found",
+			Data:    nil,
+		})
 	}
 
 	product.NamaProduct = req.NamaProduct
@@ -80,7 +109,10 @@ func UpdateProduct(c echo.Context) error {
 	product.IdBrand = req.IdBrand
 
 	if err := config.DB.Save(&product).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update product"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to update product",
+			Data:    nil,
+		})
 	}
 
 	resp := response.UpdateProductResponse{
@@ -89,7 +121,11 @@ func UpdateProduct(c echo.Context) error {
 		Quantity:    product.Quantity,
 		IdBrand:     product.IdBrand,
 	}
-	return c.JSON(http.StatusOK, resp)
+
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "success update product data",
+		Data:    resp,
+	})
 }
 
 func DeleteProduct(c echo.Context) error {
@@ -97,19 +133,31 @@ func DeleteProduct(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid product ID"})
+		return c.JSON(http.StatusBadRequest, response.TemplateResponse{
+			Message: "invalid product id",
+			Data:    nil,
+		})
 	}
 
 	var product entities.Products
 	if err := config.DB.First(&product, productID).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Product not found"})
+		return c.JSON(http.StatusNotFound, response.TemplateResponse{
+			Message: "product not found",
+			Data:    nil,
+		})
 	}
 
 	if err := config.DB.Delete(&product).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete product"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to delete product",
+			Data:    nil,
+		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Product deleted successfully"})
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "product deleted successfully",
+		Data:    nil,
+	})
 }
 
 func GetAllProducts(c echo.Context) error {
@@ -130,12 +178,18 @@ func GetAllProducts(c echo.Context) error {
 
 	var totalRecords int64
 	if err := config.DB.Model(&entities.Products{}).Count(&totalRecords).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to count products"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to count products",
+			Data:    nil,
+		})
 	}
 
 	var products []entities.Products
 	if err := config.DB.Offset(offset).Limit(sizeInt).Find(&products).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch products"})
+		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
+			Message: "failed to fetch products",
+			Data:    nil,
+		})
 	}
 
 	totalPages := int(totalRecords) / sizeInt
@@ -161,8 +215,13 @@ func GetAllProducts(c echo.Context) error {
 		TotalPage:   uint(totalPages),
 	}
 
-	return c.JSON(http.StatusOK, response.GetAllProductsResponse{
+	resp := response.GetAllProductsResponse{
 		PageInformation: pageInfo,
 		ListData:        productList,
+	}
+
+	return c.JSON(http.StatusOK, response.TemplateResponse{
+		Message: "success get products",
+		Data:    resp,
 	})
 }
