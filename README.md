@@ -1,6 +1,6 @@
 # E-Commerce API Documentation 🛒
 
-API ini digunakan untuk mengelola produk dan brand dalam aplikasi e-commerce. Dokumentasi ini mencakup semua endpoint beserta contoh penggunaannya.
+This API used to maintain products and brands in the e-commerce app. This documentation is to describe how to use all of the endpoint.
 
 ## 📋 **Table of Contents**
 - [Prerequisites](#prerequisites)
@@ -33,3 +33,26 @@ API ini digunakan untuk mengelola produk dan brand dalam aplikasi e-commerce. Do
 
 ```plaintext
 http://localhost:8000
+
+## 🔥 Endpoints Overview
+
+| Method | Endpoint           | Description                     |
+|--------|--------------------|---------------------------------|
+| POST   | `/products`        | Create a new product            |
+| GET    | `/products/{id}`   | Get product details by ID       |
+| PUT    | `/products/{id}`   | Update product details by ID    |
+| DELETE | `/products/{id}`   | Delete a product by ID          |
+| GET    | `/products`        | Get all products with pagination|
+| POST   | `/brands`          | Create a new brand              |
+| DELETE | `/brands/{id}`     | Delete a brand (if not in use)  |
+
+---
+
+## 🚀 How to Run
+- Clone repository:
+  - git clone <repo-url>
+  - cd <project-folder>
+
+- run local server:
+  - go run main.go
+
