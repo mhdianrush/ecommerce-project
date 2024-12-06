@@ -25,12 +25,15 @@ func CreateBrand(c echo.Context) error {
 		NamaBrand: req.NamaBrand,
 	}
 
-	if err := config.DB.Create(&brand).Error; err != nil {
+	tx := config.DB.Begin()
+	if err := tx.Create(&brand).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
 			Message: "failed to create brand",
 			Data:    nil,
 		})
 	}
+	tx.Commit()
 
 	resp := response.CreateBrandResponse{
 		ID: brand.IdBrand,
@@ -67,12 +70,15 @@ func DeleteBrand(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Delete(&entities.Brands{}, idInt).Error; err != nil {
+	tx := config.DB.Begin()
+	if err := tx.Delete(&entities.Brands{}, idInt).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
 			Message: "failed to delete brand",
 			Data:    nil,
 		})
 	}
+	tx.Commit()
 
 	return c.JSON(http.StatusOK, response.TemplateResponse{
 		Message: "brand deleted successfully",

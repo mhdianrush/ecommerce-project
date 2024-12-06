@@ -28,12 +28,15 @@ func CreateProduct(c echo.Context) error {
 		IdBrand:     req.IdBrand,
 	}
 
-	if err := config.DB.Create(&product).Error; err != nil {
+	tx := config.DB.Begin()
+	if err := tx.Create(&product).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
 			Message: "failed to insert product",
 			Data:    nil,
 		})
 	}
+	tx.Commit()
 
 	resp := response.CreateProductResponse{ID: product.ID}
 
@@ -108,12 +111,15 @@ func UpdateProduct(c echo.Context) error {
 	product.Quantity = req.Quantity
 	product.IdBrand = req.IdBrand
 
-	if err := config.DB.Save(&product).Error; err != nil {
+	tx := config.DB.Begin()
+	if err := tx.Save(&product).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
 			Message: "failed to update product",
 			Data:    nil,
 		})
 	}
+	tx.Commit()
 
 	resp := response.UpdateProductResponse{
 		NamaProduct: product.NamaProduct,
@@ -147,12 +153,15 @@ func DeleteProduct(c echo.Context) error {
 		})
 	}
 
-	if err := config.DB.Delete(&product).Error; err != nil {
+	tx := config.DB.Begin()
+	if err := tx.Delete(&product).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, response.TemplateResponse{
 			Message: "failed to delete product",
 			Data:    nil,
 		})
 	}
+	tx.Commit()
 
 	return c.JSON(http.StatusOK, response.TemplateResponse{
 		Message: "product deleted successfully",
